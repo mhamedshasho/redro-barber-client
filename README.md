@@ -46,3 +46,5 @@ Customer availability respects the shop's configured weekly day off, opening tim
 ## Coordinated UI refinement
 
 Added a shared visual refinement layer for the customer app: clearer mobile header and hero, consistent card shadows, stronger field labels and focus states, and a more comfortable sticky booking action on small screens.
+
+Overnight schedules are supported: a shop open from 12:00 to 01:00 accepts slots up to 00:30, while 01:00 and later are treated as closed.
