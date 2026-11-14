@@ -42,3 +42,7 @@ The booking page uses the shop's saved theme colors for surfaces, panels, fields
 ## Availability rules
 
 Customer availability respects the shop's configured weekly day off, opening time and closing time. Slots after closing are not shown, the selected day off shows no slots, and slots that have already passed today cannot be booked.
+
+## Coordinated UI refinement
+
+Added a shared visual refinement layer for the customer app: clearer mobile header and hero, consistent card shadows, stronger field labels and focus states, and a more comfortable sticky booking action on small screens.
