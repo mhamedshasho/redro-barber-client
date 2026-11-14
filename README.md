@@ -33,3 +33,7 @@ The GitHub Actions workflow publishes the repository root to GitHub Pages. In re
 
 ## Performance and cost
 No realtime subscriptions, polling, or background refresh loops. Data is loaded on demand with bounded result sets. Use Supabase Free and GitHub's free public-repository/Pages allowances only; never upgrade to paid services. Pause usage if free quotas are reached.
+
+## Customer booking UX
+
+The booking page uses the shop's saved theme colors for surfaces, panels, fields, focus rings and buttons instead of overriding them with fixed colors. Booking and settings panels close each other cleanly, mobile controls are easier to tap, inputs have clear focus feedback, and mutation buttons show an Arabic three-second cooldown to prevent duplicate submissions. The date/time flow remains cloud-only and loads availability on demand.
