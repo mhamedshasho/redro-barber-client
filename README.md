@@ -58,3 +58,7 @@ Shop settings are synchronized live from the manager through the shared `shop_se
 Appointments use whole hours only: 1:00, 2:00, 3:00, and so on. The customer app no longer tries to create internal booking records, so registration is handled through the manager-owned booking data safely.
 
 Customer appointment time uses a 12-hour Arabic selector: hours 1–12, صباحاً/مساءً, and minutes 00/15/30/45. The internal conversion remains server-compatible while the customer never sees 13–24 hour labels.
+
+## Shared manager/customer behavior
+
+The customer app now follows the same cloud-only and live-sync policy as the manager: no local shop cache, live shop-settings updates, shared theme variables, and the same motion/interaction polish. It blocks use when the network is unavailable.
