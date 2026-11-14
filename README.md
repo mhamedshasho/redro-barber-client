@@ -70,3 +70,5 @@ Customers now see the number of people ahead of them. When the queue reaches the
 Chair capacity is now read from each shop's cloud settings. Queue alerts use the current shop's saved `chair_count` automatically, with a safe fallback of three when a legacy public response omits the field.
 
 No further Supabase setup is required after the successful `chair_count` migration. The customer app refreshes the chair capacity after customer authentication and uses it for queue alerts.
+
+The customer app now shows a live corner indicator for the shop state: open, closed, or weekly day off. It follows the manager's saved hours, supports overnight schedules, refreshes every minute, and reacts to realtime settings updates.
