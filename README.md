@@ -3,7 +3,7 @@
 Customer booking portal. Each booking link is tied to one barber shop, and customer IDs are unique within that shop only.
 
 ## How customers use it
-1. Open the unique booking link supplied by the barber: `https://mhamedshasho.github.io/redro-barber-client/?shop=SHOP_SLUG`.
+1. Open the unique booking link supplied by the barber: `https://redro-barber-client.vercel.app/?shop=SHOP_SLUG&customer=CUSTOMER_NUMBER`.
 2. Sign in using Google.
 3. The first visit creates a customer profile for that shop and assigns its next available number (01, 02, 03...).
 4. Request appointments and view appointment status and queue position.
