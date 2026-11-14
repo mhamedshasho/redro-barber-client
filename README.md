@@ -62,3 +62,7 @@ Customer appointment time uses a 12-hour Arabic selector: hours 1–12, صباح
 ## Shared manager/customer behavior
 
 The customer app now follows the same cloud-only and live-sync policy as the manager: no local shop cache, live shop-settings updates, shared theme variables, and the same motion/interaction polish. It blocks use when the network is unavailable.
+
+## Queue alerts
+
+Customers now see the number of people ahead of them. When the queue reaches the shop's chair capacity, the app shows that the turn is near; when no one is ahead, it tells the customer that their turn is now and asks them to come to the shop. Completed appointments are removed from the active list but the customer account remains.
