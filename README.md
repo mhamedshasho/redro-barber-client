@@ -37,3 +37,8 @@ No realtime subscriptions, polling, or background refresh loops. Data is loaded 
 ## Customer booking UX
 
 The booking page uses the shop's saved theme colors for surfaces, panels, fields, focus rings and buttons instead of overriding them with fixed colors. Booking and settings panels close each other cleanly, mobile controls are easier to tap, inputs have clear focus feedback, and mutation buttons show an Arabic three-second cooldown to prevent duplicate submissions. The date/time flow remains cloud-only and loads availability on demand.
+
+
+## Availability rules
+
+Customer availability respects the shop's configured weekly day off, opening time and closing time. Slots after closing are not shown, the selected day off shows no slots, and slots that have already passed today cannot be booked.
