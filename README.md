@@ -56,3 +56,5 @@ The customer no longer chooses from a pre-generated available-times list. The cu
 Shop settings are synchronized live from the manager through the shared `shop_settings` record. Open customer pages receive updates for the shop name, phone, logo, theme colors, and working-hours rules without needing a manual refresh.
 
 Appointments use whole hours only: 1:00, 2:00, 3:00, and so on. The customer app no longer tries to create internal booking records, so registration is handled through the manager-owned booking data safely.
+
+Customer appointment time uses a 12-hour Arabic selector: hours 1–12, صباحاً/مساءً, and minutes 00/15/30/45. The internal conversion remains server-compatible while the customer never sees 13–24 hour labels.
