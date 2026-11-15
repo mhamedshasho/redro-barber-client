@@ -1,0 +1,21 @@
+{
+  "id": "./",
+  "name": "Redro Barber",
+  "short_name": "Barber",
+  "description": "Book and manage your barber appointments.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#101013",
+  "theme_color": "#e72d40",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
