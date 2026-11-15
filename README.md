@@ -1,84 +1,60 @@
 # Redro Barber Client
 
-Customer booking portal. Each booking link is tied to one barber shop, and customer IDs are unique within that shop only.
+Customer booking portal for Redro Barber. Each booking link identifies a barber shop, and customer access is linked to a customer record within that shop.
 
-## How customers use it
-1. Open the unique booking link supplied by the barber: `https://redro-barber-client.vercel.app/?shop=SHOP_SLUG&customer=CUSTOMER_NUMBER`.
-2. Sign in using Google.
-3. The first visit creates a customer profile for that shop and assigns its next available number (01, 02, 03...).
-4. Request appointments by available time and view appointment duration, status and queue position; no service catalog is used.
+## Customer access
 
-The same Google account can have a separate customer profile and separate customer number at each shop.
+1. Open the booking link supplied by the barber. The link includes the shop identifier, for example: `https://redro-barber-client.vercel.app/?shop=SHOP_SLUG`.
+2. Enter the customer number and the phone number already registered with the barber.
+3. The app restores an existing Supabase session when available. Otherwise, it starts an anonymous Supabase Auth session and calls the `claim_customer_login` RPC to securely link that session to the matching customer record.
+4. After access is granted, the customer can view their profile and appointments, check their queue information, and request an available appointment slot.
 
-## Google OAuth setup
-Google sign-in uses the Supabase Google provider. The shop owner configures the Google OAuth Client ID and Client Secret once in Supabase Authentication → Sign In / Providers → Google.
+The optional customer number in the URL can prefill the customer-number field. It is not a substitute for the registered phone number.
 
-Authorized redirect URI:
-`https://kqllombatzcpxjyltrsn.supabase.co/auth/v1/callback`
+## Authentication configuration
 
-Allowed app redirect:
-`https://mhamedshasho.github.io/**`
+Customer access uses Supabase Anonymous Sign-ins together with the database RPC `claim_customer_login`. Google OAuth is not used by this client.
 
-No SMS provider or paid messaging service is used.
+The client uses the Redro Barber Supabase project. Anonymous Sign-ins must be enabled in Supabase Authentication for first-time customer sessions. The client persists and refreshes the Supabase session.
 
-## Deployment
-The GitHub Actions workflow publishes the repository root to GitHub Pages. In repository Settings → Pages, select GitHub Actions.
+Barber/manager authentication is handled separately by the manager application.
+
+## Booking behavior
+
+- Customers choose a date and an available time slot supplied by the shop.
+- The client submits the selected slot through `book_my_appointment_slot`; it does not let customers choose the service, appointment duration, or appointment status.
+- New booking requests are subject to the barber's approval.
+- Customers can view their own appointment status, duration, barber notes, and queue information.
+- The client does not create or manage slot inventory.
+
+## Shop settings and availability
+
+Shop information and public settings are loaded from Supabase. The page uses the shop's saved name, contact details, logo, theme colors, chair capacity, and working-hours settings when available.
+
+Availability is based on the shop's configured working hours, weekly day off, and the individual slot records created for the shop. The client only offers slots marked available and asks the server to book the selected slot. Overnight schedules are supported by the scheduling logic.
+
+Shop settings and appointment changes can be reflected through Supabase Realtime subscriptions where configured.
 
 ## Privacy and security
-- Customer records are scoped by shop_id and user_id.
-- A customer can only access their own profile and appointments.
-- The database allocates customer numbers per shop atomically.
-- Queue lookup returns only the signed-in customer's own position and count ahead.
-- No offline booking or local business-data cache.
 
-## Performance and cost
-No realtime subscriptions, polling, or background refresh loops. Data is loaded on demand with bounded result sets. Use Supabase Free and GitHub's free public-repository/Pages allowances only; never upgrade to paid services. Pause usage if free quotas are reached.
+- Customer identity is linked through the server-side `claim_customer_login` RPC.
+- Customer profile and appointment operations are scoped to the authenticated customer and shop.
+- Queue information is requested for the signed-in customer's own appointment through `get_my_queue`.
+- The public shop information endpoint is `get_public_shop_info`.
+- The client does not contain a Supabase service-role key.
+- The application is cloud-only and requires an internet connection; it does not provide offline booking.
 
-## Customer booking UX
+Database access policies and RPC permissions must be maintained and reviewed in the Redro Barber Supabase project. Client-side checks alone are not a security boundary.
 
-The booking page uses the shop's saved theme colors for surfaces, panels, fields, focus rings and buttons instead of overriding them with fixed colors. Booking and settings panels close each other cleanly, mobile controls are easier to tap, inputs have clear focus feedback, and mutation buttons show an Arabic three-second cooldown to prevent duplicate submissions. The date/time flow remains cloud-only and loads availability on demand.
+## Deployment
 
+The client is deployed on Vercel:
 
-## Availability rules
+- Production URL: https://redro-barber-client.vercel.app
+- Source repository: https://github.com/mhamedshasho/redro-barber-client
 
-Customer availability respects the shop's configured weekly day off, opening time and closing time. Slots after closing are not shown, the selected day off shows no slots, and slots that have already passed today cannot be booked.
+Deployments are managed through the repository's connected Vercel project. This README does not assume a GitHub Pages deployment or a GitHub Actions publishing workflow.
 
-## Coordinated UI refinement
+## Performance and user experience
 
-Added a shared visual refinement layer for the customer app: clearer mobile header and hero, consistent card shadows, stronger field labels and focus states, and a more comfortable sticky booking action on small screens.
-
-Overnight schedules are supported: a shop open from 12:00 to 01:00 accepts slots up to 00:30, while 01:00 and later are treated as closed.
-
-## Direct time booking
-
-The customer no longer chooses from a pre-generated available-times list. The customer enters a requested time, and the app accepts it only when it is inside the barber's opening/closing range, not on the weekly day off, and not already booked.
-
-Shop settings are synchronized live from the manager through the shared `shop_settings` record. Open customer pages receive updates for the shop name, phone, logo, theme colors, and working-hours rules without needing a manual refresh.
-
-Appointments use whole hours only: 1:00, 2:00, 3:00, and so on. The customer app no longer tries to create internal booking records, so registration is handled through the manager-owned booking data safely.
-
-Customer appointment time uses a 12-hour Arabic selector: hours 1–12, صباحاً/مساءً, and minutes 00/15/30/45. The internal conversion remains server-compatible while the customer never sees 13–24 hour labels.
-
-## Shared manager/customer behavior
-
-The customer app now follows the same cloud-only and live-sync policy as the manager: no local shop cache, live shop-settings updates, shared theme variables, and the same motion/interaction polish. It blocks use when the network is unavailable.
-
-## Queue alerts
-
-Customers now see the number of people ahead of them. When the queue reaches the shop's chair capacity, the app shows that the turn is near; when no one is ahead, it tells the customer that their turn is now and asks them to come to the shop. Completed appointments are removed from the active list but the customer account remains.
-
-Chair capacity is now read from each shop's cloud settings. Queue alerts use the current shop's saved `chair_count` automatically, with a safe fallback of three when a legacy public response omits the field.
-
-No further Supabase setup is required after the successful `chair_count` migration. The customer app refreshes the chair capacity after customer authentication and uses it for queue alerts.
-
-The customer app now shows a live corner indicator for the shop state: open, closed, or weekly day off. It follows the manager's saved hours, supports overnight schedules, refreshes every minute, and reacts to realtime settings updates.
-
-Automatic customer login now restores the saved session with a clear timeout, prevents confusing duplicate attempts through the existing action lock, and shows a live message while opening the secure session.
-
-## Mobile-first visual redesign
-
-The customer app now follows the REDRO STUDIO mobile visual language: cleaner dark surfaces, red accent hierarchy, stronger cards, larger touch targets, improved booking controls, sticky mobile booking action, and responsive phone-first spacing. Existing authentication, Supabase data, booking rules, queue alerts, and live shop settings remain unchanged.
-
-## Real REDRO STUDIO shell rebuild
-
-Replaced the visible customer body shell with a real REDRO STUDIO mobile structure: studio header, live shop status, account actions, content container, and fixed bottom navigation connected to the existing booking, appointments, and account panels. Existing Supabase authentication, booking, queue, and settings logic remains in place.
+The client loads shop and customer data from the cloud on demand, uses guarded actions to reduce duplicate submissions, and displays feedback for network and request failures. Because booking and customer data are cloud-based, an internet connection is required.
