@@ -74,3 +74,7 @@ No further Supabase setup is required after the successful `chair_count` migrati
 The customer app now shows a live corner indicator for the shop state: open, closed, or weekly day off. It follows the manager's saved hours, supports overnight schedules, refreshes every minute, and reacts to realtime settings updates.
 
 Automatic customer login now restores the saved session with a clear timeout, prevents confusing duplicate attempts through the existing action lock, and shows a live message while opening the secure session.
+
+## Mobile-first visual redesign
+
+The customer app now follows the REDRO STUDIO mobile visual language: cleaner dark surfaces, red accent hierarchy, stronger cards, larger touch targets, improved booking controls, sticky mobile booking action, and responsive phone-first spacing. Existing authentication, Supabase data, booking rules, queue alerts, and live shop settings remain unchanged.
