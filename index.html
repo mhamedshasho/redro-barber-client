@@ -123,14 +123,27 @@ async function appointmentsLoad(){const {data,error}=await db.from("appointments
 let appointmentChannel=null,slotChannel=null;
 function subscribeMyAppointments(){if(appointmentChannel)db.removeChannel(appointmentChannel);appointmentChannel=db.channel("client-appointments-"+customer.id).on("postgres_changes",{event:"*",schema:"public",table:"appointments",filter:"customer_id=eq."+customer.id},async()=>{try{await appointmentsLoad()}catch(e){toast("تعذر تحديث حالة الموعد تلقائياً")}}).subscribe()}
 async function loadAvailableSlots(){
- const date=$("date").value; $("book").disabled=true;
- if(!date){$("availabilityMessage").textContent="اختر التاريخ ثم أدخل وقت الموعد.";return}
- const settings=await db.from("shop_settings").select("weekly_day_off,work_start,work_end").eq("shop_id",shop.shop_id).maybeSingle();if(!settings.error&&settings.data){shop={...shop,...settings.data};updateShopStatus();}
+ const date=$("date").value,picked=$("time").value;
+ $("book").disabled=true;
+ $("book").textContent="تحقق من الوقت المتاح";
+ if(!date){$("availabilityMessage").textContent="اختر التاريخ أولاً.";return}
+ const settings=await db.from("shop_settings").select("weekly_day_off,work_start,work_end").eq("shop_id",shop.shop_id).maybeSingle();
  if(settings.error)throw settings.error;
+ if(settings.data){shop={...shop,...settings.data};updateShopStatus();}
  const day=(new Date(date+"T12:00:00").getDay()||7);
  if(settings.data?.weekly_day_off&&Number(settings.data.weekly_day_off)===day){$("availabilityMessage").textContent="المحل مغلق في يوم العطلة، اختر يوماً آخر.";return}
  const start=settings.data?.work_start||"00:00",end=settings.data?.work_end||"23:59";
- $("availabilityMessage").textContent="أدخل موعداً على رأس الساعة بين "+start+" و "+end+"، مثل 1:00 أو 2:45. سيتم رفض الوقت خارج الدوام.";
+ if(!picked){$("availabilityMessage").textContent="اختر وقتاً، وسنتحقق إذا كان الحلاق قد أتاحه للحجز.";return}
+ if(!/^\\d{2}:(00|15|30|45)$/.test(picked)){ $("availabilityMessage").textContent="اختر وقتاً صحيحاً.";return}
+ const {data:slot,error}=await db.from("appointment_slots").select("id,status").eq("shop_id",shop.shop_id).eq("slot_date",date).eq("start_time",picked+":00").maybeSingle();
+ if(error)throw error;
+ if(!slot||slot.status!=="available"){
+  $("availabilityMessage").textContent="هذا الوقت غير متاح للحجز. اختر وقتاً أتاحه الحلاق أو تواصل معه.";
+  $("book").textContent="الوقت غير متاح";
+  return;
+ }
+ $("availabilityMessage").textContent="الوقت متاح للحجز ضمن دوام المحل ("+start+" - "+end+").";
+ $("book").textContent="إرسال طلب الموعد";
  $("book").disabled=false;
 }
 async function enter(){await profile();try{const chair=await db.from("shop_settings").select("chair_count").eq("shop_id",shop.shop_id).maybeSingle();if(!chair.error&&chair.data)shop.chair_count=Math.max(1,Number(chair.data.chair_count)||3)}catch{}show(true);subscribeMyAppointments();loadAvailableSlots().catch(e=>toast("تعذر تحميل دوام الحلاق"));appointmentsLoad().catch(e=>toast("تعذر تحميل المواعيد حالياً. يمكنك المحاولة من زر التحديث."))}
@@ -138,7 +151,7 @@ async function submitClientAuth(){await run("customer-login",$("clientLogin"),as
 $("save").onclick=()=>run("profile",$("save"),async()=>{const {error}=await db.from("customers").update({full_name:$("profileName").value.trim(),phone:$("profilePhone").value.trim()||null,date_of_birth:$("birth").value||null,address:$("address").value.trim()||null,updated_at:new Date().toISOString()}).eq("shop_id",shop.shop_id).eq("user_id",user.id);if(error)throw error;await profile();toast("تم حفظ البيانات")});
 $("refresh").onclick=()=>run("refresh",$("refresh"),async()=>{await profile();await appointmentsLoad();toast("تم التحديث")});
 $("logout").onclick=async()=>{await db.auth.signOut();user=null;customer=null;show(false);$("customerIdInput").value="";$("customerPhoneInput").value=""};
-$("date").min=today();$("date").value=today();$("date").addEventListener("change",()=>loadAvailableSlots().catch(e=>toast(e.message)));
+$("date").min=today();$("date").value=today();$("date").addEventListener("change",()=>loadAvailableSlots().catch(e=>toast(e.message)));["timeHour","timeMinute","timePeriod"].forEach(id=>$(id).addEventListener("change",()=>loadAvailableSlots().catch(e=>toast(e.message))));
 let authBooting=true,restorePromise=null;
 async function restoreCustomerSession(session){if(restorePromise)return restorePromise;restorePromise=(async()=>{if(!session){user=null;customer=null;show(false);return}user=session.user;try{await enter()}catch(e){if((e.message||"").includes("لم يتم ربط هذا الجهاز بحساب زبون")){customer=null;show(false);$("shopIntro").textContent="أنت تحجز لدى "+(shop.shop_name||"المحل")+". أدخل رقم الزبون ورقم هاتفك المسجل مرة واحدة لربط هذا الجهاز بحسابك.";$("authMsg").textContent="أدخل بياناتك لأول مرة على هذا الجهاز فقط."}else throw e}})().finally(()=>{restorePromise=null});return restorePromise}
 db.auth.onAuthStateChange((event,session)=>{if(event==="SIGNED_OUT"){user=null;customer=null;show(false)}else if(event==="SIGNED_IN"&&!authBooting&&!user)restoreCustomerSession(session).catch(e=>{$("authMsg").textContent=e.message;show(false)})});
