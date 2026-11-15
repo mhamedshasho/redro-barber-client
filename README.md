@@ -78,3 +78,7 @@ Automatic customer login now restores the saved session with a clear timeout, pr
 ## Mobile-first visual redesign
 
 The customer app now follows the REDRO STUDIO mobile visual language: cleaner dark surfaces, red accent hierarchy, stronger cards, larger touch targets, improved booking controls, sticky mobile booking action, and responsive phone-first spacing. Existing authentication, Supabase data, booking rules, queue alerts, and live shop settings remain unchanged.
+
+## Real REDRO STUDIO shell rebuild
+
+Replaced the visible customer body shell with a real REDRO STUDIO mobile structure: studio header, live shop status, account actions, content container, and fixed bottom navigation connected to the existing booking, appointments, and account panels. Existing Supabase authentication, booking, queue, and settings logic remains in place.
