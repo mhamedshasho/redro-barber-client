@@ -142,9 +142,9 @@ async function loadAvailableSlots(){
  const inHours=startMin===endMin?false:endMin>startMin?pickedMin>=startMin&&pickedMin<endMin:pickedMin>=startMin||pickedMin<endMin;
  if(!inHours){$("availabilityMessage").textContent="هذا الوقت خارج ساعات دوام المحل ("+start+" - "+end+").";$("book").textContent="خارج الدوام";return}
  if(date===today()){const current=String(Math.floor(shopMinutesNow()/60)).padStart(2,"0")+":"+String(shopMinutesNow()%60).padStart(2,"0");if(picked<=current){$("availabilityMessage").textContent="هذا الوقت مضى بالفعل، اختر وقتاً لاحقاً."; $("book").textContent="اختر وقتاً لاحقاً";return}}
- const {data:slot,error}=await db.from("appointment_slots").select("id,status").eq("shop_id",shop.shop_id).eq("slot_date",date).eq("start_time",picked+":00").maybeSingle();
+ const {data:available,error}=await db.rpc("check_public_appointment_slot",{p_shop_id:shop.shop_id,p_slot_date:date,p_start_time:picked+":00"});
  if(error)throw error;
- if(!slot||slot.status!=="available"){$("availabilityMessage").textContent="هذا الوقت غير متاح للحجز. اختر وقتاً أتاحه الحلاق أو تواصل معه.";$("book").textContent="الوقت غير متاح";return}
+ if(available!==true){$("availabilityMessage").textContent="هذا الوقت غير متاح أو يتعارض مع مدة موعد آخر. اختر وقتاً مختلفاً.";$("book").textContent="الوقت غير متاح";return}
  $("availabilityMessage").textContent="الوقت متاح للحجز ضمن دوام المحل ("+start+" - "+end+").";
  $("book").textContent="إرسال طلب الموعد";$("book").disabled=false;
 }
