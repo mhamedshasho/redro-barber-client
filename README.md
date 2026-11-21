@@ -58,3 +58,8 @@ Deployments are managed through the repository's connected Vercel project. This 
 ## Performance and user experience
 
 The client loads shop and customer data from the cloud on demand, uses guarded actions to reduce duplicate submissions, and displays feedback for network and request failures. Because booking and customer data are cloud-based, an internet connection is required.
+
+
+## Schedule and booking integrity update
+
+The portal checks the current saved working hours and weekly day off before enabling a booking. It rejects elapsed times for the current day, while the database booking RPC revalidates the schedule, locks the slot, and checks overlapping appointments before creating the request.
