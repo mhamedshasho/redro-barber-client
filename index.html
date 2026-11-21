@@ -135,7 +135,7 @@ async function loadAvailableSlots(){
  if(settings.data?.weekly_day_off&&Number(settings.data.weekly_day_off)===day){$("availabilityMessage").textContent="المحل مغلق في يوم العطلة، اختر يوماً آخر.";return}
  const start=settings.data?.work_start||"00:00",end=settings.data?.work_end||"23:59";
  if(!picked){$("availabilityMessage").textContent="اختر وقتاً، وسنتحقق إذا كان الحلاق قد أتاحه للحجز.";return}
- if(!/^\\d{2}:(00|15|30|45)$/.test(picked)){ $("availabilityMessage").textContent="اختر وقتاً صحيحاً.";return}
+ if(!/^\d{2}:(00|15|30|45)$/.test(picked)){ $("availabilityMessage").textContent="اختر وقتاً صحيحاً.";return}
  const {data:slot,error}=await db.from("appointment_slots").select("id,status").eq("shop_id",shop.shop_id).eq("slot_date",date).eq("start_time",picked+":00").maybeSingle();
  if(error)throw error;
  if(!slot||slot.status!=="available"){
